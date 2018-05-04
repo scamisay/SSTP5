@@ -14,7 +14,7 @@ public class Silo {
     // L > W > D
     public Silo(double width, double height, double exitOpeningSize) {
         if(exitOpeningSize > height || height > width){
-            throw new RuntimeException("width > height > exitOpeningSize");
+            throw new IllegalArgumentException("width > height > exitOpeningSize");
         }
         this.width = width;
         this.height = height;
@@ -26,7 +26,7 @@ public class Silo {
     }
 
     public void addParticles(Set<Particle> newParticles) {
-        newParticles.stream().forEach(p -> addParticle(p));
+        newParticles.forEach(this::addParticle);
     }
 
     private void addParticle(Particle p) {
