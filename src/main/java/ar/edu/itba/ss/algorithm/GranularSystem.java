@@ -2,6 +2,7 @@ package ar.edu.itba.ss.algorithm;
 
 import ar.edu.itba.ss.domain.Silo;
 import ar.edu.itba.ss.helper.Printer;
+import org.apache.commons.math3.util.FastMath;
 
 public class GranularSystem {
 
@@ -19,7 +20,7 @@ public class GranularSystem {
         this.simulationTime = simulationTime;
         this.silo = silo;
 
-        Integer particlesPerCall = new Double(Math.ceil(5*dt)).intValue();
+        int particlesPerCall = (int) FastMath.ceil(5*dt);
         particlesCreator = new ParticlesCreator(particlesPerCall);
     }
 
