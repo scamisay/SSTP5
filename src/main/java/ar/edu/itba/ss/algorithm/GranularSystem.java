@@ -36,9 +36,7 @@ public class GranularSystem {
                 printer.printState();
             }
 
-            if(silo.isFull()){
-                silo.addParticles(particlesCreator.create());
-            }
+
         }
     }
 }

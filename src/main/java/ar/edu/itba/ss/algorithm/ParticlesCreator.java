@@ -1,6 +1,7 @@
 package ar.edu.itba.ss.algorithm;
 
 import ar.edu.itba.ss.domain.Particle;
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -9,13 +10,15 @@ import static java.util.stream.Collectors.toSet;
 
 public class ParticlesCreator {
 
-    protected int particlesPerCall;
+    private Integer maxParticlesToCreate;
 
-    public ParticlesCreator(int particlesPerCall) {
-        this.particlesPerCall = particlesPerCall;
+    public ParticlesCreator(Integer maxParticlesToCreate, ) {
+        if(maxParticlesToCreate != null && maxParticlesToCreate > 0){
+            this.maxParticlesToCreate = maxParticlesToCreate;
+        }
     }
 
-    public Set<Particle> create() {
+    public Particle create() {
         return IntStream.range(0,particlesPerCall).boxed()
                 .map( i -> createParticle())
                 .collect(toSet());
@@ -25,4 +28,5 @@ public class ParticlesCreator {
     private Particle createParticle() {
         return null;
     }
+
 }
