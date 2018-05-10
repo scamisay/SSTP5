@@ -23,8 +23,8 @@ public class ParticlesCreator {
 
     //todo: definir generador aleatorios con seed
     public Particle create() {
-        Vector2D position = createPosition();
         double radius = createRadius();
+        Vector2D position = createPosition(radius);
         return new Particle(position, MASS, radius);
     }
 
@@ -39,9 +39,9 @@ public class ParticlesCreator {
         return randomBetween(MIN_RADIUS, MAX_RADIUS);
     }
 
-    private Vector2D createPosition() {
-        double x = randomBetween(area.getMinX(), area.getWidth());
-        double y = randomBetween(area.getMinY(), area.getHeight());
+    private Vector2D createPosition(double radius) {
+        double x = randomBetween(area.getMinX()+radius, area.getWidth()-radius);
+        double y = randomBetween(area.getMinY()+radius, area.getHeight()-radius);
         return new Vector2D(x,y);
     }
 
