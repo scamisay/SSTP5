@@ -50,7 +50,7 @@ public class Silo{
             particles.add(particle);
 
             //todo: ver si M esta bien
-            CellIndexMethod cim = new CellIndexMethod(1, insideSiloArea.getHeight(),
+            CellIndexMethod cim = new CellIndexMethod(5, insideSiloArea.getHeight(),
                     ParticlesCreator.MAX_RADIUS*2., particles, false);
             cim.calculate();
 
