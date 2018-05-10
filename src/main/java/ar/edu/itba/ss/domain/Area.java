@@ -12,4 +12,20 @@ public class Area {
         upLeftPoint = new Vector2D(x1,y1);
         downRightPoint = new Vector2D(x2,y2);
     }
+
+    public double getMinX() {
+        return upLeftPoint.getX();
+    }
+
+    public double getMinY() {
+        return downRightPoint.getY();
+    }
+
+    public double getWidth(){
+        return downRightPoint.getX() - upLeftPoint.getX();
+    }
+
+    public double getHeight(){
+        return upLeftPoint.getY() - downRightPoint.getY();
+    }
 }

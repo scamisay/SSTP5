@@ -3,9 +3,12 @@ package ar.edu.itba.ss.domain;
 import ar.edu.itba.ss.algorithm.cim.Cell;
 import ar.edu.itba.ss.algorithm.cim.Range;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
+import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.math3.util.MathUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class Particle {
@@ -17,12 +20,20 @@ public class Particle {
     private Cell cell;
     private List<Particle> neighbours = new ArrayList<>();
 
-    public Particle(Vector2D position, Vector2D velocity, Vector2D force, double mass, double radius) {
+    public Particle(Vector2D position, double mass, double radius) {
         this.position = position;
-        this.velocity = velocity;
-        this.force = force;
+        this.velocity = new Vector2D(0,0);
+        this.force = new Vector2D(0,0);
         this.mass = mass;
         this.radius = radius;
+    }
+
+    public Particle(Vector2D position, Particle particle) {
+        this.position = position;
+        this.velocity = particle.getVelocity();
+        this.force = particle.getForce();
+        this.mass = particle.getMass();
+        this.radius = particle.getRadius();
     }
 
     /***
@@ -54,6 +65,10 @@ public class Particle {
 
     public double getMass() {
         return mass;
+    }
+
+    public List<Particle> getNeighbours() {
+        return neighbours;
     }
 
     /***
@@ -88,9 +103,7 @@ public class Particle {
 
 
 
-                Particle newParticle = new Particle(
-                        new Vector2D(newX, newY), particle.getVelocity(),
-                        particle.getForce(), particle.getMass(), particle.getRadius());
+                Particle newParticle = new Particle(new Vector2D(newX, newY), particle);
                 return distanceCenterToCenter(newParticle) <= maxDistance;
             }
         }
@@ -151,5 +164,18 @@ public class Particle {
             throw new RuntimeException("La particula no puede ser nula");
         }
         neighbours.add(particle);
+    }
+
+    public double overlap(Particle other) {
+        double overlap = getRadius() + other.getRadius() - getPosition().distance(other.getPosition());
+        return overlap > 0 ? overlap : 0;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(Locale.US,"%.6f %.6f %.6f %.6f %.6f",
+                position.getX(), position.getY(),
+                velocity.getX(), velocity.getY(),
+                radius);
     }
 }
