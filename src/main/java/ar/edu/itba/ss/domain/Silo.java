@@ -9,6 +9,8 @@ import java.util.stream.IntStream;
 
 public class Silo{
 
+    private static final int MAX_CREATION_TRIES = 1000;
+
     private double width;
     private double height;
     private double exitOpeningSize;
@@ -33,24 +35,31 @@ public class Silo{
 
     }
 
-    private static final int MAX_CREATION_TRIES = 1000;
     public void fillSilo(int particlesToAdd) {
         ParticlesCreator filler = new ParticlesCreator(particlesToAdd, insideSiloArea);
-        IntStream.range(0,particlesToAdd).forEach( i -> addOne(filler));
+        for(int i = 0; i < particlesToAdd; i++){
+            if(addOne(filler)==0){
+                System.out.println("corté en "+i+" partículas");
+                break;
+            }
+            System.out.println("i = " + i);
+        }
     }
 
     private int addOne(ParticlesCreator filler){
         int added = 0;
         for(int intent = 1 ; intent <= MAX_CREATION_TRIES; intent++){
 
-
+            if(intent % 50 == 0){
+                System.out.println("intent = " + intent);
+            }
             List<Particle> particles = new ArrayList<>();
             particles.addAll(this.particles);
             Particle particle = filler.create();
             particles.add(particle);
 
-            //todo: ver si M esta bien
-            CellIndexMethod cim = new CellIndexMethod(5, insideSiloArea.getHeight(),
+            //Cota superior para M: L/(2 * rMax)/4 > M
+            CellIndexMethod cim = new CellIndexMethod(18, insideSiloArea.getHeight(),
                     ParticlesCreator.MAX_RADIUS*2., particles, false);
             cim.calculate();
 
@@ -83,5 +92,9 @@ public class Silo{
 
     public double getScenarioHeight(){
         return height + bottomPadding + topPadding;
+    }
+
+    public double getWidth() {
+        return width;
     }
 }

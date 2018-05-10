@@ -12,11 +12,14 @@ import java.util.stream.Collectors;
 
 public class Printer {
 
-    private double L;
+    private double height;
+    private double width;
 
     private static final String FILE_NAME_OVITO = "ovito.xyz";
 
-    public Printer(double l) {
+    public Printer(double height, double width) {
+        this.height = height;
+        this.width = width;
         try{
             File file = new File(FILE_NAME_OVITO);
 
@@ -27,7 +30,6 @@ public class Printer {
         }catch (Exception e){
             System.out.println("problemas creando el archivo "+FILE_NAME_OVITO);
         }
-        L = l;
     }
 
     public void printState(double time, List<Particle> particles){
@@ -41,8 +43,8 @@ public class Printer {
     private String printParticles(double time, List<Particle> particles) {
         return (particles.size()+2)+"\n"+
                 time + "\n" +
-                "0 0 0 0 0\n"+
-                L +" "+L+" 0 0 0\n"+
+                "0 0 0 0 0.0001\n"+
+                width +" "+height+" 0 0 0.0001\n"+
                 particles.stream()
                         .map(Particle::toString)
                         .collect(Collectors.joining("\n")) +"\n";
