@@ -192,9 +192,10 @@ public class Particle {
 
     @Override
     public String toString() {
-        return String.format(Locale.US,"%.6f %.6f %.6f %.6f %.6f",
+        return String.format(Locale.US,"%.6f %.6f %.6f %.6f %.6f %.6f %.6f",
                 position.getX(), position.getY(),
                 velocity.getX(), velocity.getY(),
+                force.getX(),force.getY(),
                 radius);
     }
 
@@ -213,7 +214,7 @@ public class Particle {
 
     void updateForce(){
         lastForce=force;
-        force = new Vector2D(0,0);
+        //force = new Vector2D(0,0);
     }
 
     public void calculateForce(double kN, double gamma) {
@@ -243,7 +244,7 @@ public class Particle {
                 .mapToDouble(p ->
                         this.getNormalForce(p,kN,gamma)*this.getNormalVersor(p).getY()
                 )
-                .sum() + getMass()*G;
+                .sum() - getMass()*G;
     }
 
     private double getNormalForce(Particle p, double kN, double gamma) {

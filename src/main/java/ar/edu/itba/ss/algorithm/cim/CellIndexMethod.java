@@ -13,7 +13,7 @@ public class CellIndexMethod {
     private int M;
     private double L;
     private double rc;
-    private List<Particle> particles = new ArrayList<>();
+    private List<Particle> particles;
     private Cell[][] environment;
     private boolean periodicContourCondition;
 

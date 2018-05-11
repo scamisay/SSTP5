@@ -43,8 +43,8 @@ public class Printer {
     private String printParticles(double time, List<Particle> particles) {
         return (particles.size()+2)+"\n"+
                 time + "\n" +
-                "0 0 0 0 0.0001\n"+
-                width +" "+height+" 0 0 0.0001\n"+
+                "0 0 0 0 0 0 0.0001\n"+
+                width +" "+height+" 0 0 0 0 0.0001\n"+
                 particles.stream()
                         .map(Particle::toString)
                         .collect(Collectors.joining("\n")) +"\n";
