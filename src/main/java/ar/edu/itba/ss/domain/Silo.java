@@ -42,7 +42,7 @@ public class Silo{
     public void fillSilo(int particlesToAdd) {
         ParticlesCreator filler = new ParticlesCreator(particlesToAdd, insideSiloArea);
         for(int i = 0; i < particlesToAdd; i++){
-            if(addOne(filler)){
+            if(!addOne(filler)){
                 break;
             }
         }

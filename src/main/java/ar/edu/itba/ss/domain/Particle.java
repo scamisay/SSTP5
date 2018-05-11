@@ -31,6 +31,7 @@ public class Particle {
         this.mass = mass;
         this.radius = radius;
         this.force = new Vector2D(0,-mass*G);
+        lastForce = force;
     }
 
     public Particle(Vector2D position, Particle particle) {
