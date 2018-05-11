@@ -37,39 +37,35 @@ public class Silo{
     public void fillSilo(int particlesToAdd) {
         ParticlesCreator filler = new ParticlesCreator(particlesToAdd, insideSiloArea);
         for(int i = 0; i < particlesToAdd; i++){
-            if(addOne(filler)==0){
+            if(addOne(filler)){
                 break;
             }
         }
     }
 
-    private int addOne(ParticlesCreator filler){
-        int added = 0;
+    private boolean addOne(ParticlesCreator filler){
         for(int intent = 1 ; intent <= MAX_CREATION_TRIES; intent++){
 
-            List<Particle> particles = new ArrayList<>();
-            particles.addAll(this.particles);
+            List<Particle> pAux = new ArrayList<>(this.particles);
             Particle particle = filler.create();
-            particles.add(particle);
+            pAux.add(particle);
 
             //Cota superior para M: L/(2 * rMax)/4 > M
             CellIndexMethod cim = new CellIndexMethod(18, insideSiloArea.getHeight(),
-                    ParticlesCreator.MAX_RADIUS*2., particles, false);
+                    ParticlesCreator.MAX_RADIUS*2., pAux, false);
             cim.calculate();
 
             if(isThereRoomForParticle(particle)){
                 addParticle(particle);
-                added = 1;
-                break;
+                return true;
             }
         }
-        return added;
+        return false;
     }
 
     private boolean isThereRoomForParticle(Particle particle) {
         return particle.getNeighbours().stream()
-                .filter( p ->  particle.overlap(p) > 0)
-                .count() == 0;
+                .noneMatch( p ->  particle.overlap(p) > 0);
     }
 
     private void addParticle(Particle particle) {
@@ -94,7 +90,7 @@ public class Silo{
 
     public void evolve(double dt) {
         particles.forEach( p -> p.updatePosition(dt));
-        particles.forEach( p -> p.updateForce());
+        particles.forEach(Particle::updateForce);
         particles.forEach( p -> p.updateVelocity(dt));
     }
 
