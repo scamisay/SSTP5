@@ -4,12 +4,12 @@ import ar.edu.itba.ss.algorithm.cim.Cell;
 import ar.edu.itba.ss.algorithm.cim.Range;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.util.FastMath;
-import org.apache.commons.math3.util.MathUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 public class Particle {
     private Vector2D position;
@@ -20,11 +20,13 @@ public class Particle {
     private Cell cell;
     private List<Particle> neighbours = new ArrayList<>();
     private Vector2D lastForce;
+    private Vector2D lastPosition;
 
     private static final double G = 9.80665;// 9.80665 m/s2
 
     public Particle(Vector2D position, double mass, double radius) {
         this.position = position;
+        this.lastPosition = position;
         this.velocity = new Vector2D(0,0);
         this.mass = mass;
         this.radius = radius;
@@ -52,6 +54,10 @@ public class Particle {
 
     public double getRadius() {
         return radius;
+    }
+
+    public Vector2D getLastPosition() {
+        return lastPosition;
     }
 
     public Vector2D getPosition() {
@@ -159,7 +165,7 @@ public class Particle {
     }
 
     public List<Particle> getOtherParticlesInCell() {
-        return getCell().getParticles().stream().filter(p -> !p.equals(this)).collect(Collectors.toList());
+        return getCell().getParticles().stream().filter(p -> !p.equals(this)).collect(toList());
     }
 
     public void addNeighbour(Particle particle) {
@@ -174,6 +180,15 @@ public class Particle {
         return overlap > 0 ? overlap : 0;
     }
 
+    public double previusOverlap(Particle other) {
+        double overlap = getRadius() + other.getRadius() - getLastPosition().distance(other.getLastPosition());
+        return overlap > 0 ? overlap : 0;//todo: probar si se permiten valores negativos
+    }
+
+    private double overlapDerivate(Particle p) {
+        return overlap(p) - previusOverlap(p);
+    }
+
     @Override
     public String toString() {
         return String.format(Locale.US,"%.6f %.6f %.6f %.6f %.6f",
@@ -183,6 +198,7 @@ public class Particle {
     }
 
     public void updatePosition(double dt) {
+        lastPosition = position;
         double newPosX = position.getX() + dt*velocity.getX() +(FastMath.pow(dt,2)/mass) *force.getX();
         double newPosY = position.getY() + dt*velocity.getY() +(FastMath.pow(dt,2)/mass) *force.getY();
         position = new Vector2D(newPosX,newPosY);
@@ -198,4 +214,52 @@ public class Particle {
         lastForce=force;
         force = new Vector2D(0,0);
     }
+
+    public void calculateForce(double kN, double gamma) {
+        //me quedo con los vecinos que colisionan conmigo
+        List<Particle> collisionsWithParticles =
+                getNeighbours().stream()
+                .filter(p -> this.overlap(p)>0)
+                .collect(toList());
+
+        //todo: agregar impacto con paredes
+
+        double totalForceInX = calculateTotalForceInX(collisionsWithParticles, kN, gamma);
+        double totalForceInY = calculateTotalForceInY(collisionsWithParticles, kN, gamma);
+        force = new Vector2D(totalForceInX, totalForceInY);
+    }
+
+    private double calculateTotalForceInX(List<Particle> collisionsWithParticles, double kN, double gamma) {
+        return collisionsWithParticles.stream()
+                .mapToDouble(p ->
+                        this.getNormalForce(p,kN,gamma)*this.getNormalVersor(p).getX()
+                )
+                .sum();
+    }
+
+    private double calculateTotalForceInY(List<Particle> collisionsWithParticles, double kN, double gamma) {
+        return collisionsWithParticles.stream()
+                .mapToDouble(p ->
+                        this.getNormalForce(p,kN,gamma)*this.getNormalVersor(p).getY()
+                )
+                .sum() + getMass()*G;
+    }
+
+    private double getNormalForce(Particle p, double kN, double gamma) {
+        return getNormalVersor(p).scalarMultiply(-1*kN*overlap(p)-gamma*overlapDerivate(p)).getNorm();
+    }
+
+    private Vector2D getNormalVersor(Particle p) {
+        double e_n_x = (p.getPosition().getX() - this.getPosition().getX())/(p.getPosition().distance(this.getPosition()));
+        double e_n_y = (p.getPosition().getY() - this.getPosition().getY())/(p.getPosition().distance(this.getPosition()));
+        return new Vector2D(e_n_x, e_n_y);
+    }
+
+    private Vector2D getTangentVersor(Particle p) {
+        Vector2D normalVersor = getNormalVersor(p);
+        double x = -1*normalVersor.getY();
+        double y = normalVersor.getY();
+        return new Vector2D(x, y);
+    }
+
 }

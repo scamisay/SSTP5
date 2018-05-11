@@ -18,6 +18,11 @@ public class Silo{
     private double topPadding;
     private double bottomPadding;
     private List<Particle> particles;
+    private double kN = 10e5;//N/m.
+    private double gamma = 10e2;
+
+    //Cota superior para M: L/(2 * rMax)/4 > M
+    private static final int M =18;
 
     // L > W > D
     public Silo(double width, double height, double exitOpeningSize, double topPadding, double bottomPadding) {
@@ -31,7 +36,6 @@ public class Silo{
         this.bottomPadding = bottomPadding;
         particles = new ArrayList<>();
         insideSiloArea = new Area(0,bottomPadding+height,width,bottomPadding);
-
     }
 
     public void fillSilo(int particlesToAdd) {
@@ -43,6 +47,11 @@ public class Silo{
         }
     }
 
+    private CellIndexMethod instantiateCIM(List<Particle> particles){
+        return new CellIndexMethod(M, insideSiloArea.getHeight(),
+                ParticlesCreator.MAX_RADIUS*2., particles, false);
+    }
+
     private int addOne(ParticlesCreator filler){
         int added = 0;
         for(int intent = 1 ; intent <= MAX_CREATION_TRIES; intent++){
@@ -52,9 +61,7 @@ public class Silo{
             Particle particle = filler.create();
             particles.add(particle);
 
-            //Cota superior para M: L/(2 * rMax)/4 > M
-            CellIndexMethod cim = new CellIndexMethod(18, insideSiloArea.getHeight(),
-                    ParticlesCreator.MAX_RADIUS*2., particles, false);
+            CellIndexMethod cim = instantiateCIM(particles);
             cim.calculate();
 
             if(isThereRoomForParticle(particle)){
@@ -92,9 +99,20 @@ public class Silo{
         return width;
     }
 
+    public void setkN(double kN) {
+        this.kN = kN;
+    }
+
+    public void setGamma(double gamma) {
+        this.gamma = gamma;
+    }
+
     public void evolve(double dt) {
+        CellIndexMethod cim = instantiateCIM(particles);
+        cim.calculate();
         particles.forEach( p -> p.updatePosition(dt));
         particles.forEach( p -> p.updateForce());
+        particles.forEach( p -> p.calculateForce(kN, gamma));
         particles.forEach( p -> p.updateVelocity(dt));
     }
 
