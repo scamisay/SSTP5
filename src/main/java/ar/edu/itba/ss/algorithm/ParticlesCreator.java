@@ -11,13 +11,11 @@ public class ParticlesCreator {
     private static final double MIN_RADIUS = 0.02;//m
     public static final double MAX_RADIUS = 0.03;//m
 
-    private Integer maxParticlesToCreate;
+    private int maxParticlesToCreate;
     private Area area;
 
-    public ParticlesCreator(Integer maxParticlesToCreate, Area area) {
-        if(maxParticlesToCreate != null && maxParticlesToCreate > 0){
-            this.maxParticlesToCreate = maxParticlesToCreate;
-        }
+    public ParticlesCreator(int maxParticlesToCreate, Area area) {
+        this.maxParticlesToCreate = maxParticlesToCreate;
         this.area = area;
     }
 
@@ -30,9 +28,10 @@ public class ParticlesCreator {
 
     private double randomBetween(double a, double b){
         if(b < a){
-            throw new RuntimeException("a<b");
+            throw new IllegalArgumentException("a<b");
         }
         return FastMath.random()*(b-a) + a;
+
     }
 
     private double createRadius() {
