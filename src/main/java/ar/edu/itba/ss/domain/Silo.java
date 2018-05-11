@@ -5,7 +5,6 @@ import ar.edu.itba.ss.algorithm.cim.CellIndexMethod;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 public class Silo{
 
@@ -39,10 +38,8 @@ public class Silo{
         ParticlesCreator filler = new ParticlesCreator(particlesToAdd, insideSiloArea);
         for(int i = 0; i < particlesToAdd; i++){
             if(addOne(filler)==0){
-                System.out.println("corté en "+i+" partículas");
                 break;
             }
-            System.out.println("i = " + i);
         }
     }
 
@@ -50,9 +47,6 @@ public class Silo{
         int added = 0;
         for(int intent = 1 ; intent <= MAX_CREATION_TRIES; intent++){
 
-            if(intent % 50 == 0){
-                System.out.println("intent = " + intent);
-            }
             List<Particle> particles = new ArrayList<>();
             particles.addAll(this.particles);
             Particle particle = filler.create();
@@ -97,4 +91,11 @@ public class Silo{
     public double getWidth() {
         return width;
     }
+
+    public void evolve(double dt) {
+        particles.forEach( p -> p.updatePosition(dt));
+        particles.forEach( p -> p.updateForce());
+        particles.forEach( p -> p.updateVelocity(dt));
+    }
+
 }

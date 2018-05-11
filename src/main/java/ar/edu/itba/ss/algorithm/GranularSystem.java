@@ -28,12 +28,17 @@ public class GranularSystem {
     public void simulate(){
         silo.fillSilo(particleNumbers);
 
-        double t =0;
+        double t = 0;
         long i = 0;
         for (; t < simulationTime ; t+=dt, i++ ){
             if (printer != null && (i % dt2 == 0)) {
                 printer.printState(t, silo.getParticles());
             }
+            silo.evolve(dt);
         }
     }
+
+
+
+
 }

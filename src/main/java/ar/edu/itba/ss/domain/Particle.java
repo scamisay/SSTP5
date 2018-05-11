@@ -19,13 +19,16 @@ public class Particle {
     private double radius;
     private Cell cell;
     private List<Particle> neighbours = new ArrayList<>();
+    private Vector2D lastForce;
+
+    private static final double G = 9.80665;// 9.80665 m/s2
 
     public Particle(Vector2D position, double mass, double radius) {
         this.position = position;
         this.velocity = new Vector2D(0,0);
-        this.force = new Vector2D(0,0);
         this.mass = mass;
         this.radius = radius;
+        this.force = new Vector2D(0,-mass*G);
     }
 
     public Particle(Vector2D position, Particle particle) {
@@ -177,5 +180,22 @@ public class Particle {
                 position.getX(), position.getY(),
                 velocity.getX(), velocity.getY(),
                 radius);
+    }
+
+    public void updatePosition(double dt) {
+        double newPosX = position.getX() + dt*velocity.getX() +(FastMath.pow(dt,2)/mass) *force.getX();
+        double newPosY = position.getY() + dt*velocity.getY() +(FastMath.pow(dt,2)/mass) *force.getY();
+        position = new Vector2D(newPosX,newPosY);
+    }
+
+    void updateVelocity(double dt) {
+        double newVx = velocity.getX() + (dt/(2*mass))*(lastForce.getX()+force.getX());
+        double newVy = velocity.getY() + (dt/(2*mass))*(lastForce.getY()+force.getY());
+        velocity = new Vector2D(newVx,newVy);
+    }
+
+    void updateForce(){
+        lastForce=force;
+        force = new Vector2D(0,0);
     }
 }
