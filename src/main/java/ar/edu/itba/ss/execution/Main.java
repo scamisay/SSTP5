@@ -9,7 +9,7 @@ public class Main {
         Silo silo = new Silo(1, 3, .5, 1,0.5);
         double dt = 0.005;
         long dt2 = 10;
-        int particleNumbers = 1;
+        int particleNumbers = 50;
         GranularSystem system = new GranularSystem(dt, dt2, 10, silo, particleNumbers);
         system.setPrintable();
         system.simulate();

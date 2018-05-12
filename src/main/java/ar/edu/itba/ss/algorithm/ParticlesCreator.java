@@ -7,15 +7,13 @@ import org.apache.commons.math3.util.FastMath;
 
 public class ParticlesCreator {
 
-    private static final double MASS = 0.01;//kg
+    public static final double MASS = 0.01;//kg
     private static final double MIN_RADIUS = 0.02;//m
     public static final double MAX_RADIUS = 0.03;//m
 
-    private int maxParticlesToCreate;
     private Area area;
 
-    public ParticlesCreator(int maxParticlesToCreate, Area area) {
-        this.maxParticlesToCreate = maxParticlesToCreate;
+    public ParticlesCreator(Area area) {
         this.area = area;
     }
 

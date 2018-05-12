@@ -2,9 +2,14 @@ package ar.edu.itba.ss.domain;
 
 import ar.edu.itba.ss.algorithm.ParticlesCreator;
 import ar.edu.itba.ss.algorithm.cim.CellIndexMethod;
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static ar.edu.itba.ss.algorithm.ParticlesCreator.MASS;
+import static ar.edu.itba.ss.algorithm.ParticlesCreator.MAX_RADIUS;
+import static ar.edu.itba.ss.domain.Particle.G;
 
 public class Silo{
 
@@ -40,12 +45,31 @@ public class Silo{
     }
 
     public void fillSilo(int particlesToAdd) {
-        ParticlesCreator filler = new ParticlesCreator(particlesToAdd, insideSiloArea);
+        //fillSiloForTest();
+        ParticlesCreator filler = new ParticlesCreator(insideSiloArea);
         for(int i = 0; i < particlesToAdd; i++){
             if(!addOne(filler)){
                 break;
             }
         }
+    }
+
+    private void fillSiloForTest(){
+        double x1 = 0;
+        double x2 = insideSiloArea.getWidth();
+        double y = insideSiloArea.getHeight();
+
+        Particle p1 = new Particle(new Vector2D(x1,y), MASS, MAX_RADIUS);
+        p1.setForce(new Vector2D(MASS*G,0));
+        particles.add(p1);
+
+        Particle p2 = new Particle(new Vector2D(x2,y), MASS, MAX_RADIUS);
+        p2.setForce(new Vector2D(-1*MASS*G,0));
+
+        particles.add(p2);
+
+        CellIndexMethod cim = instantiateCIM(particles);
+        cim.calculate();
     }
 
     private CellIndexMethod instantiateCIM(List<Particle> particles){
@@ -60,7 +84,7 @@ public class Silo{
             Particle particle = filler.create();
             pAux.add(particle);
 
-            CellIndexMethod cim = instantiateCIM(particles);
+            CellIndexMethod cim = instantiateCIM(pAux);
             cim.calculate();
 
             if(isThereRoomForParticle(particle)){

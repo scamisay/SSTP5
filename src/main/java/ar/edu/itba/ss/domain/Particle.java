@@ -22,7 +22,7 @@ public class Particle {
     private Vector2D lastForce;
     private Vector2D lastPosition;
 
-    private static final double G = 9.80665;// 9.80665 m/s2
+    public static final double G = 9.80665;// 9.80665 m/s2
 
     public Particle(Vector2D position, double mass, double radius) {
         this.position = position;
@@ -79,6 +79,11 @@ public class Particle {
 
     public List<Particle> getNeighbours() {
         return neighbours;
+    }
+
+
+    public void setForce(Vector2D force) {
+        this.force = force;
     }
 
     /***
