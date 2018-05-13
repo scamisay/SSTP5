@@ -6,10 +6,12 @@ import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
 import static java.util.stream.Collectors.toList;
+import static javafx.scene.input.KeyCode.V;
 
 public class Particle {
     private Vector2D position;
@@ -84,6 +86,14 @@ public class Particle {
 
     public void setForce(Vector2D force) {
         this.force = force;
+    }
+
+    public void setVelocity(Vector2D velocity) {
+        this.velocity = velocity;
+    }
+
+    public void setLastPosition(Vector2D lastPosition) {
+        this.lastPosition = lastPosition;
     }
 
     /***
@@ -183,7 +193,8 @@ public class Particle {
 
     public double overlap(Particle other) {
         double overlap = getRadius() + other.getRadius() - getPosition().distance(other.getPosition());
-        return overlap > 0 ? overlap : 0;
+        //return overlap > 0 ? overlap : 0;
+        return overlap;
     }
 
     public double previusOverlap(Particle other) {
@@ -222,26 +233,64 @@ public class Particle {
         //force = new Vector2D(0,0);
     }
 
-    public void calculateForce(double kN, double gamma) {
+    public void calculateForce(double kN, double gamma,Silo silo) {
         //me quedo con los vecinos que colisionan conmigo
         List<Particle> collisionsWithParticles =
                 getNeighbours().stream()
                 .filter(p -> this.overlap(p)>0)
                 .collect(toList());
 
-        //todo: agregar impacto con paredes
+        double overlapWithAWall = overlapWithAWall(silo);
+        if(overlapWithAWall > 0){
+            Particle opositeParticle = createMirroredParticle(overlapWithAWall);
+            collisionsWithParticles.add(opositeParticle);
+        }
 
         double totalForceInX = calculateTotalForceInX(collisionsWithParticles, kN, gamma);
         double totalForceInY = calculateTotalForceInY(collisionsWithParticles, kN, gamma);
         force = new Vector2D(totalForceInX, totalForceInY);
+        if(overlapWithAWall > 0){
+            velocity = velocity.negate();
+        }
+    }
+
+    private Particle createMirroredParticle(double overlapWithAWall) {
+        Vector2D influence = force.normalize();
+        Vector2D mirroredPos = position.add(influence.scalarMultiply(overlapWithAWall));
+        //Vector2D mirroredPosPrev = lastPosition.add(influence.scalarMultiply(overlapWithAWall));
+
+        Particle mirrored = new Particle(mirroredPos, this);
+
+        //cambio el sentido de las fuerzas para la particula espejada
+        mirrored.setForce(force.negate());
+        mirrored.setVelocity(velocity.negate());
+        mirrored.setLastPosition(mirroredPos);
+        return mirrored;
     }
 
     private double calculateTotalForceInX(List<Particle> collisionsWithParticles, double kN, double gamma) {
         return collisionsWithParticles.stream()
                 .mapToDouble(p ->
-                        this.getNormalForce(p,kN,gamma)*this.getNormalVersor(p).getX()
+                        getNormalForce(p,kN,gamma)*getNormalVersor(p).getX()
                 )
                 .sum();
+    }
+
+    private double overlapWithAWall(Silo silo) {
+        //si esta afuera del silo o a la altura de la apertura no considero el overlap
+        if(!silo.containsParticle(this) || silo.isInExitArea(getPosition().getX())){
+            return 0;
+        }
+
+        List<Vector2D> walls = Arrays.asList(
+                new Vector2D(silo.getLeftWall(), getPosition().getY()),
+                new Vector2D(silo.getRightWall(), getPosition().getY()),
+                new Vector2D(getPosition().getX(), silo.getBottomPadding())
+        );
+
+        return walls.stream()
+                .mapToDouble( w -> getRadius() - getPosition().distance(w) )
+                .max().getAsDouble();
     }
 
     private double calculateTotalForceInY(List<Particle> collisionsWithParticles, double kN, double gamma) {
@@ -253,7 +302,7 @@ public class Particle {
     }
 
     private double getNormalForce(Particle p, double kN, double gamma) {
-        return getNormalVersor(p).scalarMultiply(-1*kN*overlap(p)-gamma*overlapDerivate(p)).getNorm();
+        return getNormalVersor(p).scalarMultiply(-1*kN*overlap(p)+gamma*overlapDerivate(p)).getNorm();
     }
 
     private Vector2D getNormalVersor(Particle p) {
@@ -262,11 +311,15 @@ public class Particle {
         return new Vector2D(e_n_x, e_n_y);
     }
 
-    private Vector2D getTangentVersor(Particle p) {
+
+    /*private Vector2D getTangentVersor(Particle p) {
         Vector2D normalVersor = getNormalVersor(p);
         double x = -1*normalVersor.getY();
         double y = normalVersor.getY();
         return new Vector2D(x, y);
-    }
+    }*/
 
+    public void resetNeighbours() {
+        neighbours = new ArrayList<>();
+    }
 }

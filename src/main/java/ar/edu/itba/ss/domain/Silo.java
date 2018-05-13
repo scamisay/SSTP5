@@ -9,7 +9,6 @@ import java.util.List;
 
 import static ar.edu.itba.ss.algorithm.ParticlesCreator.MASS;
 import static ar.edu.itba.ss.algorithm.ParticlesCreator.MAX_RADIUS;
-import static ar.edu.itba.ss.domain.Particle.G;
 
 public class Silo{
 
@@ -23,8 +22,8 @@ public class Silo{
     private double topPadding;
     private double bottomPadding;
     private List<Particle> particles;
-    private double kN = 10e5;//N/m.
-    private double gamma = 10e2;
+    private double kN = 1e2;//N/m.
+    private double gamma = 1e1;
 
     //Cota superior para M: L/(2 * rMax)/4 > M
     private static final int M =18;
@@ -45,7 +44,8 @@ public class Silo{
     }
 
     public void fillSilo(int particlesToAdd) {
-        //fillSiloForTest();
+        //fillSiloForTest2Particles();
+        //fillSiloForTest1Particle();
         ParticlesCreator filler = new ParticlesCreator(insideSiloArea);
         for(int i = 0; i < particlesToAdd; i++){
             if(!addOne(filler)){
@@ -54,22 +54,50 @@ public class Silo{
         }
     }
 
-    private void fillSiloForTest(){
-        double x1 = 0;
-        double x2 = insideSiloArea.getWidth();
-        double y = insideSiloArea.getHeight();
+    public boolean isInExitArea(double x){
+        double exitStart = (width / 2) - (exitOpeningSize / 2);
+        double exitEnd = width - exitStart - exitOpeningSize;
+        return (exitStart <= x) && (x <= exitEnd);
+    }
+
+    private void fillSiloForTest2Particles(){
+        double x1 = MAX_RADIUS*2;
+        double x2 = insideSiloArea.getWidth()-MAX_RADIUS*2;
+        double y = insideSiloArea.getHeight()*.8;
 
         Particle p1 = new Particle(new Vector2D(x1,y), MASS, MAX_RADIUS);
-        p1.setForce(new Vector2D(MASS*G,0));
-        particles.add(p1);
+        //p1.setForce(new Vector2D(0,0));
+        p1.setVelocity(new Vector2D(2,0));
 
         Particle p2 = new Particle(new Vector2D(x2,y), MASS, MAX_RADIUS);
-        p2.setForce(new Vector2D(-1*MASS*G,0));
+        //p2.setForce(new Vector2D(0,0));
+        p2.setVelocity(new Vector2D(-2,0));
 
-        particles.add(p2);
+        List<Particle> pAux = new ArrayList<>();
+        pAux.add(p1);
+        pAux.add(p2);
 
-        CellIndexMethod cim = instantiateCIM(particles);
+        CellIndexMethod cim = instantiateCIM(pAux);
         cim.calculate();
+
+        particles.addAll(pAux);
+    }
+
+    private void fillSiloForTest1Particle(){
+        double x1 = MAX_RADIUS*2;
+        double y = insideSiloArea.getHeight()*.8;
+
+        Particle p1 = new Particle(new Vector2D(x1,y), MASS, MAX_RADIUS);
+        p1.setVelocity(new Vector2D(2,0));
+
+
+        List<Particle> pAux = new ArrayList<>();
+        pAux.add(p1);
+
+        CellIndexMethod cim = instantiateCIM(pAux);
+        cim.calculate();
+
+        particles.addAll(pAux);
     }
 
     private CellIndexMethod instantiateCIM(List<Particle> particles){
@@ -120,6 +148,10 @@ public class Silo{
         return width;
     }
 
+    public double getBottomPadding() {
+        return bottomPadding;
+    }
+
     public void setkN(double kN) {
         this.kN = kN;
     }
@@ -133,8 +165,19 @@ public class Silo{
         cim.calculate();
         particles.forEach( p -> p.updatePosition(dt));
         particles.forEach(Particle::updateForce);
-        particles.forEach( p -> p.calculateForce(kN, gamma));
+        particles.forEach( p -> p.calculateForce(kN, gamma, this));
         particles.forEach( p -> p.updateVelocity(dt));
     }
 
+    public boolean containsParticle(Particle particle) {
+        return insideSiloArea.containsParticle(particle);
+    }
+
+    public double getLeftWall() {
+        return insideSiloArea.getMinX();
+    }
+
+    public double getRightWall() {
+        return insideSiloArea.getWidth();
+    }
 }

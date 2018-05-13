@@ -28,4 +28,10 @@ public class Area {
     public double getHeight(){
         return upLeftPoint.getY() - downRightPoint.getY();
     }
+
+    public boolean containsParticle(Particle particle) {
+        boolean isInX = (getMinX() <= particle.getPosition().getX()) && (particle.getPosition().getX() <= getWidth());
+        boolean isInY = (getMinY() <= particle.getPosition().getY()) && (particle.getPosition().getY() <= getHeight());
+        return isInX && isInY;
+    }
 }
