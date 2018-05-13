@@ -249,8 +249,20 @@ public class Particle {
         double totalForceInX = calculateTotalForceInX(collisionsWithParticles, kN, gamma);
         double totalForceInY = calculateTotalForceInY(collisionsWithParticles, kN, gamma);
         force = new Vector2D(totalForceInX, totalForceInY);
+
         if(overlapWithAWall > 0){
             velocity = velocity.negate();
+            /*double bottomOverlap = overlapWithABottomWall(silo);
+            Vector2D newVelocidy = null;
+            if(overlapWithAWall != bottomOverlap){
+                //fue con una pared
+                newVelocidy = new Vector2D(velocity.getX()*-1, velocity.getY());
+            }else {
+                //fue con el fondo
+                newVelocidy = new Vector2D(velocity.getX(), velocity.getY()*-1);
+            }
+            //se modifica una de las componentes de la velocidad dependiendo de q pared toco
+            velocity = newVelocidy;*/
         }
     }
 
@@ -275,6 +287,21 @@ public class Particle {
                 )
                 .sum();
     }
+
+    private double overlapWithABottomWall(Silo silo) {
+        if(!silo.containsParticle(this) || silo.isInExitArea(getPosition().getX())){
+            return 0;
+        }
+
+        List<Vector2D> walls = Arrays.asList(
+                new Vector2D(getPosition().getX(), silo.getBottomPadding())
+        );
+
+        return walls.stream()
+                .mapToDouble( w -> getRadius() - getPosition().distance(w) )
+                .max().getAsDouble();
+    }
+
 
     private double overlapWithAWall(Silo silo) {
         //si esta afuera del silo o a la altura de la apertura no considero el overlap
@@ -302,7 +329,7 @@ public class Particle {
     }
 
     private double getNormalForce(Particle p, double kN, double gamma) {
-        return getNormalVersor(p).scalarMultiply(-1*kN*overlap(p)+gamma*overlapDerivate(p)).getNorm();
+        return getNormalVersor(p).scalarMultiply(-1*kN*overlap(p)-gamma*overlapDerivate(p)).getNorm();
     }
 
     private Vector2D getNormalVersor(Particle p) {

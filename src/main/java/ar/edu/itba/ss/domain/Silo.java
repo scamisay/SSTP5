@@ -56,7 +56,7 @@ public class Silo{
 
     public boolean isInExitArea(double x){
         double exitStart = (width / 2) - (exitOpeningSize / 2);
-        double exitEnd = width - exitStart - exitOpeningSize;
+        double exitEnd = exitStart + exitOpeningSize;
         return (exitStart <= x) && (x <= exitEnd);
     }
 
@@ -84,11 +84,11 @@ public class Silo{
     }
 
     private void fillSiloForTest1Particle(){
-        double x1 = MAX_RADIUS*2;
+        double x1 = 0.5;
         double y = insideSiloArea.getHeight()*.8;
 
         Particle p1 = new Particle(new Vector2D(x1,y), MASS, MAX_RADIUS);
-        p1.setVelocity(new Vector2D(2,0));
+        p1.setVelocity(new Vector2D(0,0));
 
 
         List<Particle> pAux = new ArrayList<>();
