@@ -186,7 +186,7 @@ public class Particle {
 
     public void addNeighbour(Particle particle) {
         if (particle == null) {
-            throw new RuntimeException("La particula no puede ser nula");
+            throw new IllegalArgumentException("La particula no puede ser nula");
         }
         neighbours.add(particle);
     }
