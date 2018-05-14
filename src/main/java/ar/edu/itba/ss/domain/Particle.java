@@ -197,8 +197,8 @@ public class Particle {
 
     public double overlap(Particle other) {
         double overlap = getRadius() + other.getRadius() - getPosition().distance(other.getPosition());
-        //return overlap > 0 ? overlap : 0;
-        return overlap;
+        return overlap > 0 ? overlap : 0;
+        //return overlap;
     }
 
     public double previusOverlap(Particle other) {
@@ -282,7 +282,7 @@ public class Particle {
         //force = new Vector2D(0,0);
     }
 
-    public void calculateForce(double kN, double gamma,Silo silo) {
+    public void calculateForce(double kN, double gamma,Silo silo, double dt) {
         //me quedo con los vecinos que colisionan conmigo
         List<Particle> collisionsWithParticles =
                 getNeighbours().stream()
@@ -295,8 +295,8 @@ public class Particle {
             collisionsWithParticles.add(opositeParticle);
         }
 
-        double totalForceInX = calculateTotalForceInX(collisionsWithParticles, kN, gamma);
-        double totalForceInY = calculateTotalForceInY(collisionsWithParticles, kN, gamma);
+        double totalForceInX = calculateTotalForceInX(collisionsWithParticles, kN, gamma, dt);
+        double totalForceInY = calculateTotalForceInY(collisionsWithParticles, kN, gamma, dt);
         force = new Vector2D(totalForceInX, totalForceInY);
 
         if(overlapWithAWall > 0){
@@ -329,10 +329,10 @@ public class Particle {
         return mirrored;
     }
 
-    private double calculateTotalForceInX(List<Particle> collisionsWithParticles, double kN, double gamma) {
+    private double calculateTotalForceInX(List<Particle> collisionsWithParticles, double kN, double gamma, double dt) {
         return collisionsWithParticles.stream()
                 .mapToDouble(p ->
-                        getNormalForce(p,kN,gamma)*getNormalVersor(p).getX()
+                        getNormalForce(p,kN,gamma, dt)*getNormalVersor(p).getX()
                 )
                 .sum();
     }
@@ -370,16 +370,16 @@ public class Particle {
                 .max().getAsDouble();
     }
 
-    private double calculateTotalForceInY(List<Particle> collisionsWithParticles, double kN, double gamma) {
+    private double calculateTotalForceInY(List<Particle> collisionsWithParticles, double kN, double gamma, double dt) {
         return collisionsWithParticles.stream()
                 .mapToDouble(p ->
-                        this.getNormalForce(p,kN,gamma)*this.getNormalVersor(p).getY()
+                        this.getNormalForce(p,kN,gamma,dt)*this.getNormalVersor(p).getY()
                 )
                 .sum() - getMass()*G;
     }
 
-    private double getNormalForce(Particle p, double kN, double gamma) {
-        return getNormalVersor(p).scalarMultiply(-1*kN*overlap(p)-gamma*overlapDerivate(p)).getNorm();
+    private double getNormalForce(Particle p, double kN, double gamma, double dt) {
+        return getNormalVersor(p).scalarMultiply(-1*kN*overlap(p)-gamma*overlapDerivate(p)/dt).getNorm();
     }
 
     private Vector2D getNormalVersor(Particle p) {

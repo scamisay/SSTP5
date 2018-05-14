@@ -30,10 +30,13 @@ public class GranularSystem {
 
         double t = 0;
         long i = 0;
+        long previous = System.currentTimeMillis();
         for (; t < simulationTime ; t+=dt, i++ ){
             if (printer != null && (i % dt2 == 0)) {
+                long current = System.currentTimeMillis();
                 printer.printState(t, silo.getParticles());
-                System.out.println(t);
+                System.out.println(t + " - " + (current-previous));
+                previous = current;
             }
             silo.evolve(dt);
         }
