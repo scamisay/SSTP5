@@ -365,9 +365,10 @@ public class Particle {
                 new Vector2D(getPosition().getX(), silo.getHeight()+silo.getBottomPadding())
         );
 
-        return walls.stream()
+        double ret = walls.stream()
                 .mapToDouble( w -> getRadius() - getPosition().distance(w) )
                 .max().getAsDouble();
+        return ret>0?ret:0;
     }
 
     private double calculateTotalForceInY(List<Particle> collisionsWithParticles, double kN, double gamma, double dt) {
