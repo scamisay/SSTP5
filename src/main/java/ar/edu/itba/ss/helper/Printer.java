@@ -60,15 +60,23 @@ public class Printer {
         StringBuffer sb = new StringBuffer();
         String format = "%.6f %.6f 0 0 0 0 %.6f 1 0 0";
         double radius = .01;
+        //walls
         for(double y = silo.getBottomPadding(); y <= (silo.getHeight()+silo.getBottomPadding()); y+=radius){
             sb.append(String.format(format,silo.getLeftWall(), y, radius)+"\n");
             sb.append(String.format(format,silo.getRightWall(), y, radius)+"\n");
         }
+
+        //bottom
         for(double x = silo.getLeftWall(); x <= silo.getExitStart(); x+=radius){
             sb.append(String.format(format,x, silo.getBottomPadding(), radius)+"\n");
         }
         for(double x = silo.getExitEnd(); x <= silo.getRightWall(); x+=radius){
             sb.append(String.format(format,x, silo.getBottomPadding(), radius)+"\n");
+        }
+
+        //top
+        for(double x = silo.getLeftWall(); x <= silo.getWidth(); x+=radius){
+            sb.append(String.format(format,x, silo.getBottomPadding()+silo.getHeight(), radius)+"\n");
         }
         return sb.toString();
     }

@@ -88,7 +88,6 @@ public class Particle {
         return neighbours;
     }
 
-
     public void setForce(Vector2D force) {
         this.force = force;
     }
@@ -235,6 +234,9 @@ public class Particle {
             if(brokeThroughBottom(silo,lastYPosition)){
                 lastPosition = new Vector2D(lastXPosition, lastYPosition);
                 position = new Vector2D(position.getX(), Math.max(silo.getBottomPadding(), lastYPosition));
+            }else if(brokeThroughTop(silo,lastYPosition)){
+                lastPosition = new Vector2D(lastXPosition, lastYPosition);
+                position = new Vector2D(position.getX(), Math.min(silo.getBottomPadding(), lastYPosition));
             }else if(brokeThroughLefttWall(silo,lastXPosition)){
                 lastPosition = new Vector2D(lastXPosition, lastYPosition);
                 position = new Vector2D(Math.max(silo.getLeftWall(),lastXPosition), position.getY());
@@ -259,6 +261,14 @@ public class Particle {
                 position.getX() >= silo.getLeftWall() &&
                 position.getX() <= silo.getRightWall() &&
                 (lastYPosition > silo.getBottomPadding() ) && ( silo.getBottomPadding() >= position.getY());
+    }
+
+    private boolean brokeThroughTop(Silo silo, double lastYPosition) {
+        double top = silo.getBottomPadding() + silo.getHeight();
+        return !silo.isInExitArea(position.getX()) &&
+                position.getX() >= silo.getLeftWall() &&
+                position.getX() <= silo.getRightWall() &&
+                (lastYPosition < top ) && ( top <= position.getY());
     }
 
     void updateVelocity(double dt) {
@@ -297,7 +307,7 @@ public class Particle {
                 //fue con una pared
                 newVelocidy = new Vector2D(velocity.getX()*-1, velocity.getY());
             }else {
-                //fue con el fondo
+                //fue con el fondo o con el techo
                 newVelocidy = new Vector2D(velocity.getX(), velocity.getY()*-1);
             }
             //se modifica una de las componentes de la velocidad dependiendo de q pared toco
@@ -306,7 +316,7 @@ public class Particle {
     }
 
     private Particle createMirroredParticle(double overlapWithAWall) {
-        Vector2D influence = force.normalize();
+        Vector2D influence = force.equals(force.getZero())? force: force.normalize();
         Vector2D mirroredPos = position.add(influence.scalarMultiply(overlapWithAWall));
         //Vector2D mirroredPosPrev = lastPosition.add(influence.scalarMultiply(overlapWithAWall));
 
@@ -351,7 +361,8 @@ public class Particle {
         List<Vector2D> walls = Arrays.asList(
                 new Vector2D(silo.getLeftWall(), getPosition().getY()),
                 new Vector2D(silo.getRightWall(), getPosition().getY()),
-                new Vector2D(getPosition().getX(), silo.getBottomPadding())
+                new Vector2D(getPosition().getX(), silo.getBottomPadding()),
+                new Vector2D(getPosition().getX(), silo.getHeight()+silo.getBottomPadding())
         );
 
         return walls.stream()
