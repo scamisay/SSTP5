@@ -54,7 +54,8 @@ public class GranularSystem {
                     //caudalBeverloo(t)
                 }
             }
-            silo.evolve(dt);
+            //silo.evolve(dt);
+            silo.evolveLeapFrog(dt);
 
         }
     }

@@ -380,12 +380,12 @@ public class Particle {
     }
 
     private double getNormalForce(Particle p, double kN, double gamma, double dt) {
-        return getNormalVersor(p).scalarMultiply(-1*kN*overlap(p)-gamma*overlapDerivate(p)/dt).getNorm();
+        return getNormalVersor(p).scalarMultiply(-1*kN*overlap(p)-gamma*overlapDerivate(p)).getNorm();
     }
 
     private Vector2D getNormalVersor(Particle p) {
-        double e_n_x = (p.getPosition().getX() - this.getPosition().getX())/(p.getPosition().distance(this.getPosition()));
-        double e_n_y = (p.getPosition().getY() - this.getPosition().getY())/(p.getPosition().distance(this.getPosition()));
+        double e_n_x = ( this.getPosition().getX() - p.getPosition().getX())/(p.getPosition().distance(this.getPosition()));
+        double e_n_y = ( this.getPosition().getY() - p.getPosition().getY())/(p.getPosition().distance(this.getPosition()));
         return new Vector2D(e_n_x, e_n_y);
     }
 
@@ -404,4 +404,57 @@ public class Particle {
     public double getKineticEnergy(){
         return 0.5*mass*velocity.getNormSq();
     }
+
+    public void updateVelocityLF(double dt) {
+        double newVx = velocity.getX() + (dt/(mass))*(force.getX());
+        double newVy = velocity.getY() + (dt/(mass))*(force.getY());
+        velocity = new Vector2D(newVx,newVy);
+    }
+
+    public void updatePositionLF(double dt, Silo silo) {
+        if(silo.wentOutside(this)){
+            position = silo.chooseAvailablePositionInSilo(radius);
+            initParticle();
+        }else{
+            double lastXPosition = lastPosition.getX();
+            double lastYPosition = lastPosition.getY();
+
+            double newPosX = lastPosition.getX() + (dt/mass) *force.getX();
+            double newPosY = lastPosition.getY() + (dt/mass) *force.getY();
+            position = new Vector2D(newPosX,newPosY);
+            lastPosition = position;
+
+            if(brokeThroughBottom(silo,lastYPosition)){
+                lastPosition = new Vector2D(lastXPosition, lastYPosition);
+                position = new Vector2D(position.getX(), Math.max(silo.getBottomPadding(), lastYPosition));
+            }else if(brokeThroughTop(silo,lastYPosition)){
+                lastPosition = new Vector2D(lastXPosition, lastYPosition);
+                position = new Vector2D(position.getX(), Math.min(silo.getBottomPadding(), lastYPosition));
+            }else if(brokeThroughLefttWall(silo,lastXPosition)){
+                lastPosition = new Vector2D(lastXPosition, lastYPosition);
+                position = new Vector2D(Math.max(silo.getLeftWall(),lastXPosition), position.getY());
+            }else if(brokeThroughRighttWall(silo,lastXPosition)){
+                lastPosition = new Vector2D(lastXPosition, lastYPosition);
+                position = new Vector2D(Math.min(silo.getRightWall(),lastXPosition), position.getY());
+            }
+        }
+    }
+
+    public void calculateForceLF(double kN, double gamma, Silo silo, double dt) {
+        List<Particle> collisionsWithParticles =
+                getNeighbours().stream()
+                        .filter(p -> this.overlap(p)>0)
+                        .collect(toList());
+
+        double overlapWithAWall = overlapWithAWall(silo);
+        if(overlapWithAWall > 0){
+            Particle opositeParticle = createMirroredParticle(overlapWithAWall);
+            collisionsWithParticles.add(opositeParticle);
+        }
+
+        double totalForceInX = calculateTotalForceInX(collisionsWithParticles, kN, gamma, dt);
+        double totalForceInY = calculateTotalForceInY(collisionsWithParticles, kN, gamma, dt);
+        force = new Vector2D(totalForceInX, totalForceInY);
+    }
 }
+

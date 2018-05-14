@@ -179,6 +179,14 @@ public class Silo{
         particles.forEach( p -> p.updateVelocity(dt));
     }
 
+    public void evolveLeapFrog(double dt) {
+        CellIndexMethod cim = instantiateCIM(particles);
+        cim.calculate();
+        particles.forEach( p -> p.updateVelocityLF(dt));
+        particles.forEach( p -> p.updatePositionLF(dt, this));
+        particles.forEach( p -> p.calculateForceLF(kN, gamma, this, dt));
+    }
+
     public boolean containsParticle(Particle particle) {
         return insideSiloArea.containsParticle(particle);
     }
