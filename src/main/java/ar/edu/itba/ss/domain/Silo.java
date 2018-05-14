@@ -5,7 +5,9 @@ import ar.edu.itba.ss.algorithm.cim.CellIndexMethod;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ar.edu.itba.ss.algorithm.ParticlesCreator.MASS;
 import static ar.edu.itba.ss.algorithm.ParticlesCreator.MAX_RADIUS;
@@ -190,7 +192,9 @@ public class Silo{
     }
 
     public boolean wentOutside(Particle particle) {
-        return particle.getPosition().getY() <= 0;
+        return (particle.getPosition().getY() <= 0 )||
+                (getLeftWall() > particle.getPosition().getX()-particle.getRadius()) ||
+                (getRightWall() < particle.getPosition().getX()+particle.getRadius());
     }
 
     //todo: ponerlo dentro del silo sin superposiciones
@@ -198,5 +202,27 @@ public class Silo{
         ParticlesCreator creator = new ParticlesCreator(insideSiloArea);
         Vector2D relocatedPosition = creator.createRandomPosition(radius,getBottomPadding()+  getHeight()*.8);
         return relocatedPosition;
+    }
+
+    public double getKineticEnergy() {
+        return particles.stream().mapToDouble( p -> p.getKineticEnergy()).sum();
+    }
+
+    private List<Particle> particlesRecentlyFallen = new ArrayList<>();
+
+    public long numberOfparticlesHaveEscaped() {
+        Iterator<Particle> it = particlesRecentlyFallen.iterator();
+        while(it.hasNext()){
+            Particle particle = it.next();
+            if(particle.getPosition().getY() > getBottomPadding()){
+                it.remove();
+            }
+        }
+        List<Particle> newFallen = particles.stream()
+                .filter( p -> !particlesRecentlyFallen.contains(p))
+                .filter( p -> p.getPosition().getY() < getBottomPadding())
+                .collect(Collectors.toList());
+        particlesRecentlyFallen.addAll(newFallen);
+        return newFallen.size();
     }
 }

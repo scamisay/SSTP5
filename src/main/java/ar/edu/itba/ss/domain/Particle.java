@@ -399,4 +399,8 @@ public class Particle {
     public void resetNeighbours() {
         neighbours = new ArrayList<>();
     }
+
+    public double getKineticEnergy(){
+        return 0.5*mass*velocity.getNormSq();
+    }
 }
