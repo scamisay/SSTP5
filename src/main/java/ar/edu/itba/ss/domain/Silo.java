@@ -26,7 +26,7 @@ public class Silo{
     private double gamma = 1e2;
 
     //Cota superior para M: L/(2 * rMax)/4 > M
-    private static final int M =10;
+    private static final int M =4;
 
     // L > W > D
     public Silo(double width, double height, double exitOpeningSize, double topPadding, double bottomPadding) {
