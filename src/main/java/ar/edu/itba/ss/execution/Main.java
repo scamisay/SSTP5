@@ -10,8 +10,8 @@ public class Main {
         double exitOpeningSize = width/4;
         Silo silo = new Silo(width, 1, exitOpeningSize, .25,0.25);
         double dt = 1e-5;
-        long dt2 = (long)1e3;
-        int particleNumbers = 50;
+        long dt2 = (long)1e2;
+        int particleNumbers = 100;
         GranularSystem system = new GranularSystem(dt, dt2, 2, silo, particleNumbers);
         system.setPrintable();
         system.updateStatisticalValues();
