@@ -33,6 +33,7 @@ public class GranularSystem {
         for (; t < simulationTime ; t+=dt, i++ ){
             if (printer != null && (i % dt2 == 0)) {
                 printer.printState(t, silo.getParticles());
+                System.out.println(t);
             }
             silo.evolve(dt);
         }

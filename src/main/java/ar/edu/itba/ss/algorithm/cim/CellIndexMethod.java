@@ -32,7 +32,7 @@ public class CellIndexMethod {
 
     private void initializeEnvironment() {
         //reseteo la lista de vecinos de cada particula
-        particles.forEach( p -> p.resetNeighbours());
+        particles.stream().forEach( Particle::resetNeighbours); //TODO: Parallel
 
         //creo cells
         environment = new Cell[M][M];
