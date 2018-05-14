@@ -1,6 +1,7 @@
 package ar.edu.itba.ss.helper;
 
 import ar.edu.itba.ss.domain.Particle;
+import ar.edu.itba.ss.domain.Silo;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,12 +15,14 @@ public class Printer {
 
     private double height;
     private double width;
+    private Silo silo;
 
     private static final String FILE_NAME_OVITO = "ovito.xyz";
 
-    public Printer(double height, double width) {
-        this.height = height;
-        this.width = width;
+    public Printer(Silo silo) {
+        this.silo = silo;
+        this.height = silo.getScenarioHeight();
+        this.width = silo.getWidth();
         try{
             File file = new File(FILE_NAME_OVITO);
 
@@ -41,13 +44,33 @@ public class Printer {
     }
 
     private String printParticles(double time, List<Particle> particles) {
-        return (particles.size()+2)+"\n"+
+        String printedBorders = printSiloBorders();
+        int particlesInBorder = printedBorders.split("\n").length;
+        return (particles.size()+particlesInBorder+2)+"\n"+
                 time + "\n" +
-                "0 0 0 0 0 0 0.0001\n"+
-                width +" "+height+" 0 0 0 0 0.0001\n"+
+                "0 0 0 0 0 0 0.0001 0 0 0\n"+
+                width +" "+height+" 0 0 0 0 0.0001 0 0 0\n"+
+                printedBorders +
                 particles.stream()
                         .map(Particle::toString)
                         .collect(Collectors.joining("\n")) +"\n";
+    }
+
+    private String printSiloBorders() {
+        StringBuffer sb = new StringBuffer();
+        String format = "%.6f %.6f 0 0 0 0 %.6f 1 0 0";
+        double radius = .01;
+        for(double y = silo.getBottomPadding(); y <= (silo.getHeight()+silo.getBottomPadding()); y+=radius){
+            sb.append(String.format(format,silo.getLeftWall(), y, radius)+"\n");
+            sb.append(String.format(format,silo.getRightWall(), y, radius)+"\n");
+        }
+        for(double x = silo.getLeftWall(); x <= silo.getExitStart(); x+=radius){
+            sb.append(String.format(format,x, silo.getBottomPadding(), radius)+"\n");
+        }
+        for(double x = silo.getExitEnd(); x <= silo.getRightWall(); x+=radius){
+            sb.append(String.format(format,x, silo.getBottomPadding(), radius)+"\n");
+        }
+        return sb.toString();
     }
 
     private void printStringToFile(String filename, String content){

@@ -22,11 +22,11 @@ public class Silo{
     private double topPadding;
     private double bottomPadding;
     private List<Particle> particles;
-    private double kN = 1e2;//N/m.
-    private double gamma = 1e1;
+    private double kN = 1e3;//N/m.
+    private double gamma = 1e2;
 
     //Cota superior para M: L/(2 * rMax)/4 > M
-    private static final int M =18;
+    private static final int M =10;
 
     // L > W > D
     public Silo(double width, double height, double exitOpeningSize, double topPadding, double bottomPadding) {
@@ -54,9 +54,17 @@ public class Silo{
         }
     }
 
+    public double getExitStart(){
+        return (width / 2) - (exitOpeningSize / 2);
+    }
+
+    public double getExitEnd(){
+        return getExitStart() + exitOpeningSize;
+    }
+
     public boolean isInExitArea(double x){
-        double exitStart = (width / 2) - (exitOpeningSize / 2);
-        double exitEnd = exitStart + exitOpeningSize;
+        double exitStart = getExitStart();
+        double exitEnd = getExitEnd();
         return (exitStart <= x) && (x <= exitEnd);
     }
 
@@ -163,7 +171,7 @@ public class Silo{
     public void evolve(double dt) {
         CellIndexMethod cim = instantiateCIM(particles);
         cim.calculate();
-        particles.forEach( p -> p.updatePosition(dt));
+        particles.forEach( p -> p.updatePosition(dt, this));
         particles.forEach(Particle::updateForce);
         particles.forEach( p -> p.calculateForce(kN, gamma, this));
         particles.forEach( p -> p.updateVelocity(dt));
@@ -179,5 +187,16 @@ public class Silo{
 
     public double getRightWall() {
         return insideSiloArea.getWidth();
+    }
+
+    public boolean wentOutside(Particle particle) {
+        return particle.getPosition().getY() <= 0;
+    }
+
+    //todo: ponerlo dentro del silo sin superposiciones
+    public Vector2D chooseAvailablePositionInSilo(double radius) {
+        ParticlesCreator creator = new ParticlesCreator(insideSiloArea);
+        Vector2D relocatedPosition = creator.createRandomPosition(radius,getBottomPadding()+  getHeight()*.8);
+        return relocatedPosition;
     }
 }

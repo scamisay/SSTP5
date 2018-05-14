@@ -22,7 +22,7 @@ public class GranularSystem {
     }
 
     public void setPrintable(){
-        printer = new Printer(silo.getScenarioHeight(), silo.getWidth());
+        printer = new Printer(silo);
     }
 
     public void simulate(){
