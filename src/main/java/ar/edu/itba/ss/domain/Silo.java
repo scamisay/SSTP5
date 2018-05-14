@@ -16,13 +16,13 @@ public class Silo{
 
     private static final int MAX_CREATION_TRIES = 1000;
 
-    private double width;
-    private double height;
-    private double exitOpeningSize;
+    private final double width;
+    private final double height;
+    private final double exitOpeningSize;
     private double falldownLimit;
     private Area insideSiloArea;
-    private double topPadding;
-    private double bottomPadding;
+    private final double topPadding;
+    private final double bottomPadding;
     private List<Particle> particles;
     private double kN = 1e3;//N/m.
     private double gamma = 1e2;
@@ -175,7 +175,7 @@ public class Silo{
         cim.calculate();
         particles.forEach( p -> p.updatePosition(dt, this));
         particles.forEach(Particle::updateForce);
-        particles.forEach( p -> p.calculateForce(kN, gamma, this));
+        particles.forEach( p -> p.calculateForce(kN, gamma, this, dt));
         particles.forEach( p -> p.updateVelocity(dt));
     }
 
