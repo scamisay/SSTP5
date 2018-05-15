@@ -60,6 +60,10 @@ public class Silo{
         return (width / 2) - (exitOpeningSize / 2);
     }
 
+    public double getExitOpeningSize() {
+        return exitOpeningSize;
+    }
+
     public double getExitEnd(){
         return getExitStart() + exitOpeningSize;
     }

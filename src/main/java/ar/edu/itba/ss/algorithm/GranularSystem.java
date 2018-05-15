@@ -7,6 +7,10 @@ import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ar.edu.itba.ss.algorithm.ParticlesCreator.MAX_RADIUS;
+import static ar.edu.itba.ss.algorithm.ParticlesCreator.MIN_RADIUS;
+import static ar.edu.itba.ss.domain.Particle.G;
+
 public class GranularSystem {
 
     private double dt;
@@ -20,6 +24,8 @@ public class GranularSystem {
     private boolean updateStatisticalValues;
     private List<Vector2D> kineticEnergy = new ArrayList<>();
     private List<Vector2D> caudal = new ArrayList<>();
+
+    private static final double SLIDING_WINDOW = .2;
 
     public GranularSystem(double dt, long dt2, double simulationTime, Silo silo, int particleNumbers) {
         this.dt = dt;
@@ -48,10 +54,9 @@ public class GranularSystem {
                     printer.printState(t, silo.getParticles());
                     System.out.println(t);
                 }
-                if(updateStatisticalValues){
+                if(updateStatisticalValues && (t > simulationTime*SLIDING_WINDOW)){
                     updateKineticEnergy(t);
                     updateCaudal(t);
-                    //caudalBeverloo(t)
                 }
             }
             //silo.evolve(dt);
@@ -61,10 +66,7 @@ public class GranularSystem {
     }
 
     private void updateCaudal(double t) {
-        long count = silo.numberOfparticlesHaveEscaped();
-        if(count>0){
-            caudal.add(new Vector2D(t, count));
-        }
+        caudal.add(new Vector2D(t, silo.numberOfparticlesHaveEscaped()));
     }
 
     private void updateKineticEnergy(double t) {
@@ -78,5 +80,24 @@ public class GranularSystem {
 
     public List<Vector2D> getCaudal() {
         return caudal;
+    }
+
+    public double getAverageCaudal(){
+        return caudal.stream().mapToDouble(v->v.getY()).average().getAsDouble();
+    }
+
+    public double getStandardDeviation(){
+        double average = getAverageCaudal();
+        return Math.sqrt(
+                caudal.stream()
+                .mapToDouble(v->Math.pow( v.getY() - average ,2))
+                .sum() / (caudal.size() - 1)
+        );
+    }
+
+    public double getBeverlooCaudal(){
+        double cr = (MAX_RADIUS+MIN_RADIUS)/2;
+        double d = silo.getExitOpeningSize();
+        return particleNumbers*Math.sqrt(G)*Math.pow(d-cr, 1.5);
     }
 }
