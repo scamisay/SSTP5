@@ -6,13 +6,13 @@ import ar.edu.itba.ss.domain.Silo;
 public class Main {
 
     public static void main(String[] args) {
-        double width = .25;
-        double exitOpeningSize = width/4;
-        Silo silo = new Silo(width, 1, exitOpeningSize, .25,0.25);
+        double width = .5;
+        double exitOpeningSize = .15;
+        Silo silo = new Silo(width, 2, exitOpeningSize, .25,0.25);
         double dt = 1e-5;
         long dt2 = (long)1e2;
-        int particleNumbers = 100;
-        GranularSystem system = new GranularSystem(dt, dt2, 2, silo, particleNumbers);
+        int particleNumbers = 400;
+        GranularSystem system = new GranularSystem(dt, dt2, .5, silo, particleNumbers);
         system.setPrintable();
         system.updateStatisticalValues();
         system.simulate();

@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
 import static javafx.scene.input.KeyCode.POUND;
 import static javafx.scene.input.KeyCode.V;
@@ -421,10 +422,23 @@ public class Particle {
 
             double newPosX = lastPosition.getX() + (dt/mass) *force.getX();
             double newPosY = lastPosition.getY() + (dt/mass) *force.getY();
+
+            if(!silo.isInExitArea(newPosX) && (newPosY-getRadius())<=silo.getBottomPadding() ){
+                newPosY = silo.getBottomPadding() + getRadius();
+            }
+
+            if((newPosX-getRadius())<=silo.getLeftWall() ){
+                newPosX = silo.getLeftWall() + getRadius();
+            }
+
+            if((newPosX+getRadius())>=silo.getRightWall() ){
+                newPosX = silo.getRightWall() - getRadius();
+            }
+
             position = new Vector2D(newPosX,newPosY);
             lastPosition = position;
 
-            if(brokeThroughBottom(silo,lastYPosition)){
+            /*if(brokeThroughBottom(silo,lastYPosition)){
                 lastPosition = new Vector2D(lastXPosition, lastYPosition);
                 position = new Vector2D(position.getX(), Math.max(silo.getBottomPadding(), lastYPosition));
             }else if(brokeThroughTop(silo,lastYPosition)){
@@ -436,7 +450,9 @@ public class Particle {
             }else if(brokeThroughRighttWall(silo,lastXPosition)){
                 lastPosition = new Vector2D(lastXPosition, lastYPosition);
                 position = new Vector2D(Math.min(silo.getRightWall(),lastXPosition), position.getY());
-            }
+            }else {
+                lastPosition = position;
+            }*/
         }
     }
 
