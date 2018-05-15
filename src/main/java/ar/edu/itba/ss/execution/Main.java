@@ -9,7 +9,7 @@ public class Main {
 
     public static void main(String[] args) {
         double width = .5;
-        double exitOpeningSize = .15;
+        double exitOpeningSize = 0;
         Silo silo = new Silo(width, 2, exitOpeningSize, .25,0.25);
         double dt = 1e-5;
         long dt2 = (long)1e2;
