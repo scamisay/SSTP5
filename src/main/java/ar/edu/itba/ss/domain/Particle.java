@@ -403,6 +403,9 @@ public class Particle {
     }
 
     public double getKineticEnergy(){
+        if(Double.isNaN(velocity.getY()) || Double.isNaN(velocity.getX() )){
+            return 0;
+        }
         return 0.5*mass*velocity.getNormSq();
     }
 
