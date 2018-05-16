@@ -9,7 +9,7 @@ import static ar.edu.itba.ss.helper.Numeric.randomBetween;
 
 public class ParticlesCreator {
 
-    public static final double MASS = 0.01;//kg
+    public static final double MASS = 0.1;//kg
     public static final double MIN_RADIUS = 0.02/2;//m
     public static final double MAX_RADIUS = 0.03/2;//m
 
