@@ -5,6 +5,7 @@ import ar.edu.itba.ss.helper.Printer;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static ar.edu.itba.ss.algorithm.ParticlesCreator.MAX_RADIUS;
@@ -35,8 +36,11 @@ public class GranularSystem {
         this.particleNumbers = particleNumbers;
     }
 
-    public void updateStatisticalValues(){
-        updateStatisticalValues=true;
+    private List<Double> timesForStatics = new ArrayList<>();
+    private List<Long> npList = new ArrayList<>();
+
+    public void updateStatisticalValues(List<Double> times){
+        timesForStatics = times;
     }
 
     public void setPrintable(){
@@ -48,21 +52,49 @@ public class GranularSystem {
 
         double t = 0;
         long i = 0;
+
+        double nextStatPoint = simulationTime;
+        Iterator<Double> itStatPoints = timesForStatics.iterator();
+        if(itStatPoints.hasNext()){
+            nextStatPoint = itStatPoints.next();
+        }
+
         for (; t < simulationTime ; t+=dt, i++ ){
             if (i % dt2 == 0 ) {
-                if(printer != null){
+                /*if(printer != null){
                     printer.printState(t, silo.getParticles());
                     System.out.println(t);
-                }
-                if(updateStatisticalValues && (t > simulationTime*SLIDING_WINDOW)){
+                }*/
+
+                if(t > nextStatPoint){
                     updateKineticEnergy(t);
                     updateCaudal(t);
+
+                    if(itStatPoints.hasNext()){
+                        nextStatPoint = itStatPoints.next();
+                        npList.add(calculateNp());
+                    }else {
+                        nextStatPoint = simulationTime;
+                    }
                 }
+
+                /*if(updateStatisticalValues && (t > simulationTime*SLIDING_WINDOW)){
+                    updateKineticEnergy(t);
+                    updateCaudal(t);
+                }*/
             }
             //silo.evolve(dt);
             silo.evolveLeapFrog(dt);
 
         }
+    }
+
+    private Long calculateNp() {
+        return silo.getParticles().stream()
+                .filter( p -> p.getPosition().getY() >= silo.getBottomPadding())
+                .filter( p -> p.getPosition().getY() <= (silo.getBottomPadding() + silo.getHeight()))
+                .filter( p -> p.getForce() .getX() > 0)
+                .count();
     }
 
     private void updateCaudal(double t) {
@@ -95,9 +127,14 @@ public class GranularSystem {
         );
     }
 
-    public double getBeverlooCaudal(){
-        double cr = (MAX_RADIUS+MIN_RADIUS)/2;
+    public List<Long> getNpList() {
+        return npList;
+    }
+
+    public double getBeverlooCaudal(double c){
+        double r = (MAX_RADIUS+MIN_RADIUS)/2;
         double d = silo.getExitOpeningSize();
-        return particleNumbers*Math.sqrt(G)*Math.pow(d-cr, 1.5);
+        double np = npList.stream().mapToLong( cnp -> cnp).average().getAsDouble();
+        return np*Math.sqrt(G)*Math.pow(d-(c*r), 1.5);
     }
 }
