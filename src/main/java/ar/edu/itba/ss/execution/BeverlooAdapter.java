@@ -81,7 +81,7 @@ public class BeverlooAdapter {
            }
             caudalSimuladoAvg.add(tmpList.stream().mapToDouble(d->d).average().getAsDouble());
             caudalSimuladoMin.add(tmpList.stream().mapToDouble(d->d).min().getAsDouble());
-            caudalSimuladoMax.add(tmpList.stream().mapToDouble(d->d).average().getAsDouble());
+            caudalSimuladoMax.add(tmpList.stream().mapToDouble(d->d).max().getAsDouble());
         }
 
         // armo los caudales teoricos por cada time y c
@@ -95,6 +95,8 @@ public class BeverlooAdapter {
        System.out.println(eCList);
         System.out.println(todosLosCaudalesTeoricos);
         System.out.println(caudalSimuladoAvg);
+        System.out.println(caudalSimuladoMin);
+        System.out.println(caudalSimuladoMax);
 
 
 
@@ -118,7 +120,7 @@ public class BeverlooAdapter {
     }
 
     public static void main(String[] args) {
-        BeverlooAdapter adapter = new BeverlooAdapter(1.4, 5, -300,5,1);
+        BeverlooAdapter adapter = new BeverlooAdapter(1.4, 10, -30,15,.5);
         adapter.startSimulation();
     }
 }
