@@ -1,5 +1,6 @@
 package ar.edu.itba.ss.algorithm;
 
+import ar.edu.itba.ss.domain.Particle;
 import ar.edu.itba.ss.domain.Silo;
 import ar.edu.itba.ss.helper.Printer;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
@@ -7,6 +8,7 @@ import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ar.edu.itba.ss.algorithm.ParticlesCreator.MAX_RADIUS;
 import static ar.edu.itba.ss.algorithm.ParticlesCreator.MIN_RADIUS;
@@ -37,7 +39,7 @@ public class GranularSystem {
     }
 
     private List<Double> timesForStatics = new ArrayList<>();
-    private List<Long> npList = new ArrayList<>();
+    private List<Double> npList = new ArrayList<>();
 
     public void updateStatisticalValues(List<Double> times){
         timesForStatics = times;
@@ -89,12 +91,23 @@ public class GranularSystem {
         }
     }
 
-    private Long calculateNp() {
+    private List<Particle> particlesInPressureArea(){
         return silo.getParticles().stream()
                 .filter( p -> p.getPosition().getY() >= silo.getBottomPadding())
                 .filter( p -> p.getPosition().getY() <= (silo.getBottomPadding() + silo.getHeight()))
-                .filter( p -> p.getForce() .getX() > 0)
-                .count();
+                .filter( p -> p.getForce() .getX() > 0).collect(Collectors.toList());
+    }
+
+    private double calculateNp() {
+        long n =  particlesInPressureArea().size();
+        double areaOfPressure = calculateAreaOfPressure();
+        return n/areaOfPressure;
+    }
+
+    private double calculateAreaOfPressure() {
+        /*double height = particlesInPressureArea().stream().mapToDouble( p -> p.getPosition().getY()).max().getAsDouble() - silo.getBottomPadding();
+        return height * silo.getWidth();*/
+        return silo.getWidth() * silo.getWidth();
     }
 
     private void updateCaudal(double t) {
@@ -127,14 +140,14 @@ public class GranularSystem {
         );
     }
 
-    public List<Long> getNpList() {
+    public List<Double> getNpList() {
         return npList;
     }
 
     public double getBeverlooCaudal(double c){
         double r = (MAX_RADIUS+MIN_RADIUS)/2;
         double d = silo.getExitOpeningSize();
-        double np = npList.stream().mapToLong( cnp -> cnp).average().getAsDouble();
+        double np = npList.stream().mapToDouble( cnp -> cnp).average().getAsDouble();
         return np*Math.sqrt(G)*Math.pow(d-(c*r), 1.5);
     }
 }

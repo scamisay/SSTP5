@@ -59,7 +59,7 @@ public class BeverlooAdapter {
        times = Arrays.asList( .9, 1. , 1.1 , 1.2 , 1.3);
 
 
-       List<Long> npList = new ArrayList<>();
+       List<Double> npList = new ArrayList<>();
        for(int i=1 ; i <= samples ; i++){
            System.out.println("sample nro "+i);
            silo = new Silo(width, 2, exitOpeningSize, .25,0.25);
@@ -106,21 +106,21 @@ public class BeverlooAdapter {
         return caudalSimuladoAvg.stream().mapToDouble( qS -> Math.pow(qS - qT, 2)).average().getAsDouble();
     }
 
-    private List<Vector2D> todosLosCaudalesTeoricos(List<Double> cList, List<Long> npList) {
+    private List<Vector2D> todosLosCaudalesTeoricos(List<Double> cList, List<Double> npList) {
         return cList.stream()
                 .map( c -> new Vector2D(c, beverlooCaudal(c, npList)))
                 .collect(Collectors.toList());
     }
 
-    public double beverlooCaudal(double c, List<Long> npList){
+    public double beverlooCaudal(double c, List<Double> npList){
         double r = (MAX_RADIUS+MIN_RADIUS)/2;
         double d = silo.getExitOpeningSize();
-        double np = npList.stream().mapToLong( cnp -> cnp).average().getAsDouble();
+        double np = npList.stream().mapToDouble( cnp -> cnp).average().getAsDouble();
         return np*Math.sqrt(G)*Math.pow(d-(c*r), 1.5);
     }
 
     public static void main(String[] args) {
-        BeverlooAdapter adapter = new BeverlooAdapter(1.4, 10, -30,15,.5);
+        BeverlooAdapter adapter = new BeverlooAdapter(1.4, 1, .5,1.5,0.03);
         adapter.startSimulation();
     }
 }
