@@ -355,16 +355,21 @@ public class Particle {
 
     private double overlapWithAWall(Silo silo) {
         //si esta afuera del silo o a la altura de la apertura no considero el overlap
-        if(!silo.containsParticle(this) || silo.isInExitArea(getPosition().getX())){
+        /*if(!silo.containsParticle(this) || silo.isInExitArea(getPosition().getX())){
             return 0;
-        }
+        }*/
 
         List<Vector2D> walls = Arrays.asList(
                 new Vector2D(silo.getLeftWall(), getPosition().getY()),
                 new Vector2D(silo.getRightWall(), getPosition().getY()),
-                new Vector2D(getPosition().getX(), silo.getBottomPadding()),
-                new Vector2D(getPosition().getX(), silo.getHeight()+silo.getBottomPadding())
+                new Vector2D(getPosition().getX(), silo.getBottomPadding())
+                //new Vector2D(getPosition().getX(), silo.getHeight()+silo.getBottomPadding())
         );
+        for (Vector2D w:walls){
+            if (getRadius() -getPosition().distance(w)>0){
+
+            }
+        }
 
         double ret = walls.stream()
                 .mapToDouble( w -> getRadius() - getPosition().distance(w) )
@@ -417,6 +422,7 @@ public class Particle {
 
     public void updatePositionLF(double dt, Silo silo) {
         if(silo.wentOutside(this)){
+            System.out.println("Out : "+this);
             position = silo.chooseAvailablePositionInSilo(radius);
             initParticle();
         }else{
@@ -426,17 +432,20 @@ public class Particle {
             double newPosX = lastPosition.getX() + (dt/mass) *force.getX();
             double newPosY = lastPosition.getY() + (dt/mass) *force.getY();
 
-            if(!silo.isInExitArea(newPosX) && (newPosY-getRadius())<=silo.getBottomPadding() ){
+            /*if(!silo.isInExitArea(newPosX) && (newPosY-getRadius())<=silo.getBottomPadding() ){
+                System.out.println("1 : "+this);
                 newPosY = silo.getBottomPadding() + getRadius();
-            }
+            }*/
 
-            if((newPosX-getRadius())<=silo.getLeftWall() ){
+            /*if((newPosX-getRadius())<=silo.getLeftWall() ){
+                System.out.println("2 : "+this);
                 newPosX = silo.getLeftWall() + getRadius();
-            }
+            }*/
 
-            if((newPosX+getRadius())>=silo.getRightWall() ){
+            /*if((newPosX+getRadius())>=silo.getRightWall() ){
+                System.out.println("3 : "+this);
                 newPosX = silo.getRightWall() - getRadius();
-            }
+            }*/
 
             position = new Vector2D(newPosX,newPosY);
             lastPosition = position;

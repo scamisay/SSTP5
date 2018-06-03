@@ -25,7 +25,7 @@ public class Silo{
     private final double bottomPadding;
     private List<Particle> particles;
     private double kN = 1e3;//N/m.
-    private double gamma = 1e2;
+    private double gamma = 1e5;
 
     //Cota superior para M: L/(2 * rMax)/4 > M
     private static final int M =4;
@@ -204,9 +204,13 @@ public class Silo{
     }
 
     public boolean wentOutside(Particle particle) {
-        return (particle.getPosition().getY() <= 0 )||
+        if( (particle.getPosition().getY() <= 0 )/*||
                 (getLeftWall() > particle.getPosition().getX()-particle.getRadius()) ||
-                (getRightWall() < particle.getPosition().getX()+particle.getRadius());
+                (getRightWall() < particle.getPosition().getX()+particle.getRadius())*/ ) {
+            //System.out.println(particle.getPosition().getY()<=0);
+            return true;
+        }
+        return false;
     }
 
     //todo: ponerlo dentro del silo sin superposiciones
