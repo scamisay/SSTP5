@@ -121,8 +121,10 @@ public class GranularSystem {
         caudal.add(new Vector2D(t, silo.numberOfparticlesHaveEscaped()));
     }
 
-    private void updateKineticEnergy(double t) {
-        kineticEnergy.add(new Vector2D(t, silo.getKineticEnergy()));
+    private double updateKineticEnergy(double t) {
+        double k = silo.getKineticEnergy();
+        kineticEnergy.add(new Vector2D(t, k));
+        return k;
     }
 
 
