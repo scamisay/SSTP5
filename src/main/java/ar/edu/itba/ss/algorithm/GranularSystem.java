@@ -69,15 +69,10 @@ public class GranularSystem {
                 }*/
 
                 if(t > nextStatPoint){
-                    updateKineticEnergy(t);
+                    //updateKineticEnergy(t);
                     updateCaudal(t);
+                    //updateCountForDensity();
 
-                    if(itStatPoints.hasNext()){
-                        nextStatPoint = itStatPoints.next();
-                        npList.add(calculateNp());
-                    }else {
-                        nextStatPoint = simulationTime;
-                    }
                 }
 
                 /*if(updateStatisticalValues && (t > simulationTime*SLIDING_WINDOW)){
@@ -91,6 +86,17 @@ public class GranularSystem {
         }
     }
 
+    private List<Integer> particlesInPressureArea = new ArrayList<>();
+    private List<Double> heightOfAreaInPressure = new ArrayList<>();
+    private void updateCountForDensity() {
+        List<Particle> pp = particlesInPressureArea();
+        particlesInPressureArea.add(pp.size());
+        heightOfAreaInPressure.add(
+                pp.stream().mapToDouble( p -> p.getPosition().getY()).max().getAsDouble() - silo.getBottomPadding()
+        );
+    }
+
+
     private List<Particle> particlesInPressureArea(){
         return silo.getParticles().stream()
                 .filter( p -> p.getPosition().getY() >= silo.getBottomPadding())
@@ -98,16 +104,17 @@ public class GranularSystem {
                 .filter( p -> p.getForce() .getX() > 0).collect(Collectors.toList());
     }
 
-    private double calculateNp() {
-        long n =  particlesInPressureArea().size();
+    public double calculateNp() {
+        double nAv =  particlesInPressureArea.stream().mapToInt( n -> n).average().getAsDouble();
         double areaOfPressure = calculateAreaOfPressure();
-        return n/areaOfPressure;
+        return nAv/areaOfPressure;
     }
 
     private double calculateAreaOfPressure() {
         /*double height = particlesInPressureArea().stream().mapToDouble( p -> p.getPosition().getY()).max().getAsDouble() - silo.getBottomPadding();
         return height * silo.getWidth();*/
-        return silo.getWidth() * silo.getWidth();
+        double height = heightOfAreaInPressure.stream().mapToDouble( h -> h).average().getAsDouble();
+        return height * silo.getWidth();
     }
 
     private void updateCaudal(double t) {
